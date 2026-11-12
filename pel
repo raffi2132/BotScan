@@ -122,7 +122,7 @@ getgenv().Config = getgenv().Config or {
 		PsCode = "",
 		FastMode = false,
 		WebhookURL = IMPEL_WEBHOOK,
-		FpsCap = 30,
+		FpsCap = 20,
         NoRender = false,
 	},
 	CircleQueue = {
@@ -7837,6 +7837,20 @@ elseif ids.Dungeon then
 		local cfg = getgenv().ZephyronCombat or {}
 		if cfg.GoroTravel == false then return false end
 		if not ImpelNightmarePlus() then return false end -- Normal mode: walker, untouched
+		-- NO GORO-GORO IN INVENTORY (user 2026-11-11): Nightmare+ with no Goro-Goro in the backpack
+		-- or hand walks the WHOLE run exactly like Normal mode -- no cast attempts, no per-leg
+		-- raycasts, no hop log. The backpack is the real test because goroCast equips from it.
+		-- Checked per call, not cached, so picking the fruit up mid-run re-enables the hops.
+		if not (Character and Character:FindFirstChild("Goro-Goro")) then
+			local gbp = GoroLP:FindFirstChildOfClass("Backpack")
+			if not (gbp and gbp:FindFirstChild("Goro-Goro")) then
+				if tick() - (ZQ5.goroNoFruitSaid or 0) > 30 then
+					ZQ5.goroNoFruitSaid = tick()
+					print("[GORO] no Goro-Goro in inventory - walking this run like Normal mode")
+				end
+				return false
+			end
+		end
 		-- (leverMode legs hop now too, user 2026-10-30: the Floor 2 lever leg and the leg after
 		-- it fly -- ZQ5.goroHopFlying keeps the flight noclipped wherever it runs)
 		-- (Floor 1 the maze HOPS now, user 2026-10-30: goroLeg sets ZQ5.goroHopFlying and the
