@@ -120,9 +120,15 @@ end
 getgenv().Config = getgenv().Config or {
 	Misc = {
 		PsCode = "",
+		-- CLOUD PHONE (user 2026-11-12: 2 accounts on one device). Both of these were
+		-- OFF and they are the two biggest memory/CPU savers in the script:
+		--   FastMode  drops textures/effects (~740 MB on the recorded run)
+		--   NoRender  stops the 3D world being drawn at all (the GPU's whole job)
+		-- Set either back to false and that saving goes away.
 		FastMode = true,
 		WebhookURL = IMPEL_WEBHOOK,
 		FpsCap = 30,
+		NoRender = true,
 	},
 	CircleQueue = {
 		Enabled = false,
@@ -959,6 +965,15 @@ WebhookIcons = {}
 if getgenv().Config and getgenv().Config.Misc then
 	local misc = getgenv().Config.Misc
 
+	-- (2026-11-12) kill 3D drawing BEFORE the heavy FastMode passes run on load. Both
+	-- used to start together -- drawing the world while texture/effect sweeps ran --
+	-- which is the join/requeue CPU spike on a cloud phone. No new local here on purpose.
+	pcall(function()
+		if misc.NoRender ~= false then
+			game:GetService("RunService"):Set3dRenderingEnabled(false)
+		end
+	end)
+
 	if misc.FpsCap then
 		setfpscap(misc.FpsCap)
 		-- KEEP THE CAP (user 2026-11-07: sitohetetonobu ran at 60 with FpsCap 30 -- set once at start, something raised it
@@ -1288,12 +1303,15 @@ if getgenv().Config and getgenv().Config.Misc then
 			end
 		end
 
+		-- (2026-11-12) stagger the heavy sweeps between accounts: on one cloud phone both
+		-- clients otherwise run the texture/effect passes at the same instant on one CPU.
+		-- Set Config.Misc.InitDelay per account (0.5 and 6 work well for a pair).
 		local function InitializeFastMode()
 			-- (applyGraphicsSettings / disablePostEffects not called any more, user 2026-11-07: quality level, lighting, water
 			-- and post effects only change how the world is DRAWN, and the 3D world is off. They also overwrote the device's
 			-- saved graphics quality.)
 
-			task.wait(0.5)
+			task.wait(tonumber(misc.InitDelay) or 0.5)
 
 			optimizeIslands()
 			optimizeEffects()
@@ -2043,13 +2061,14 @@ if getgenv().Config and getgenv().Config.Misc then
 		getgenv().WebHook = IMPEL_WEBHOOK -- (a Config set elsewhere without a URL: still report here)
 	end
 end
--- AUTO RECONNECT (user 2026-10-28): disconnected / kicked -> rejoin the MAIN MENU place (1730877806), retrying
+-- AUTO RECONNECT (user 2026-10-28; retargeted 2026-11-12): disconnected / kicked -> rejoin the UNIVERSE HUB
+-- (6360478118), retrying
 -- every 5s until the teleport goes through. (Replaces the obfuscated-build-only one that went to the Universe
 -- hub.) Hooked once per client (getgenv flag), whatever place we're in. ZephyronCombat.AutoReconnect = false: off.
 if not getgenv().ImpelAutoReconnect then
 	getgenv().ImpelAutoReconnect = true
 	task.spawn(function()
-		local MAIN_MENU = 1730877806
+		local UNIVERSE_HUB = 6360478118 -- (user 2026-11-12: straight back to the hub, not the main menu)
 		local TS = game:GetService("TeleportService")
 		local going = false
 		local function rejoin(why)
@@ -2057,12 +2076,12 @@ if not getgenv().ImpelAutoReconnect then
 				return
 			end
 			going = true
-			pcall(print, "[RECONNECT] " .. tostring(why) .. " - rejoining the main menu")
+			pcall(print, "[RECONNECT] " .. tostring(why) .. " - rejoining the Universe Hub")
 			task.spawn(function()
 				task.wait(2)
 				while true do
 					pcall(function()
-						TS:Teleport(MAIN_MENU, game:GetService("Players").LocalPlayer)
+						TS:Teleport(UNIVERSE_HUB, game:GetService("Players").LocalPlayer)
 					end)
 					task.wait(5)
 				end
