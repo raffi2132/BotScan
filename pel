@@ -120,7 +120,7 @@ end
 getgenv().Config = getgenv().Config or {
 	Misc = {
 		PsCode = "",
-		FastMode = false,
+		FastMode = true,
 		WebhookURL = IMPEL_WEBHOOK,
 		FpsCap = 30,
 	},
