@@ -123,7 +123,6 @@ getgenv().Config = getgenv().Config or {
 		FastMode = false,
 		WebhookURL = IMPEL_WEBHOOK,
 		FpsCap = 20,
-        NoRender = true,
 	},
 	CircleQueue = {
 		Enabled = false,
