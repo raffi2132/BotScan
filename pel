@@ -122,7 +122,7 @@ getgenv().Config = getgenv().Config or {
 		PsCode = "",
 		FastMode = false,
 		WebhookURL = IMPEL_WEBHOOK,
-		FpsCap = 20,
+		FpsCap = 30,
 	},
 	CircleQueue = {
 		Enabled = false,
