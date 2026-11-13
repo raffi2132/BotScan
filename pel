@@ -127,7 +127,7 @@ getgenv().Config = getgenv().Config or {
 		-- Set either back to false and that saving goes away.
 		FastMode = false,
 		WebhookURL = IMPEL_WEBHOOK,
-		FpsCap = 15,
+		FpsCap = 30,
 	},
 	CircleQueue = {
 		Enabled = false,
