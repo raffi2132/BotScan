@@ -125,7 +125,7 @@ getgenv().Config = getgenv().Config or {
 		--   FastMode  drops textures/effects (~740 MB on the recorded run)
 		--   NoRender  stops the 3D world being drawn at all (the GPU's whole job)
 		-- Set either back to false and that saving goes away.
-		FastMode = true,
+		FastMode = false,
 		WebhookURL = IMPEL_WEBHOOK,
 		FpsCap = 30,
 	},
